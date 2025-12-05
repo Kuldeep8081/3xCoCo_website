@@ -34,7 +34,7 @@ const Hero = () => {
                     transition={{ delay: 0.5, duration: 0.8 }}
                     className="text-[#d4af37] tracking-[0.4em] text-sm md:text-base mb-6 uppercase"
                 >
-                    Est. 1924 • Belgium
+                    Est. 2025 • Belgium
                 </motion.p>
                 <motion.h1
                     initial={{ opacity: 0, y: 30 }}

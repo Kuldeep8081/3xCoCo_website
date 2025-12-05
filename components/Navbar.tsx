@@ -2,7 +2,8 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Menu, X, ShoppingCart, User, } from 'lucide-react';
+import { Menu, X, ShoppingCart, User, } from 'lucide-react';
+import Link from 'next/link';
 
 // --- COMPONENTS ---
 
@@ -13,7 +14,7 @@ const Navbar = () => {
     <nav className="sticky top-0 w-full z-50 bg-[#2b1b17]/90 backdrop-blur-md border-b border-white/10">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         <div className="text-2xl font-serif text-[#d4af37] tracking-widest cursor-pointer">
-          3XCoCo
+          <Link href="/">3XCoCo</Link>
         </div>
         
         {/* Desktop Menu */}

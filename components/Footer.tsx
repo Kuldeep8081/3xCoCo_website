@@ -7,7 +7,7 @@ const Footer = () => {
           3XCoCo
         </div>
         <p className="text-[#8c7e7a] text-sm max-w-md leading-relaxed">
-          Crafting moments of pure bliss since 1924. Experience the darkness, taste the light.
+          Crafting moments of pure bliss since 2025. Experience the darkness, taste the light.
         </p>
         <p className="text-[#8c7e7a] text-xs pt-8">
           © {new Date().getFullYear()} 3XCoCo Chocolatiers. All rights reserved.
