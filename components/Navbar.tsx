@@ -62,7 +62,7 @@ const Navbar = () => {
           >
             <div className="flex flex-col items-start py-8 space-y-6 ml-4 text-[#f5e6d3]">
               <a href="#" className="text-lg tracking-widest hover:text-[#d4af37] transition-colors">SHOP</a>
-              <a href="#" className="text-lg tracking-widest hover:text-[#d4af37] transition-colors">COLLECTIONS</a>
+              <a href="collections" className="text-lg tracking-widest hover:text-[#d4af37] transition-colors">COLLECTIONS</a>
               <a href="#" className="text-lg tracking-widest hover:text-[#d4af37] transition-colors">OUR STORY</a>
               <a href="#" className="text-lg tracking-widest hover:text-[#d4af37] transition-colors">ORDERS</a>
               <div className="relative">

@@ -17,7 +17,7 @@ const Page = async ({
 
     return (
         <div className='w-full min-h-screen flex flex-col items-center bg-amber-950'>
-            <div className="mt-15 p-6 bg-[#2b1b17] rounded-lg shadow-lg hover:shadow-amber-950 transition-shadow duration-300">
+            <div className="my-15 p-6 bg-[#2b1b17] rounded-lg shadow-lg hover:shadow-amber-950 transition-shadow duration-300">
                 <div className="flex items-center justify-center mb-6">
                     <Image src={image as string} alt={name as string} width={400} height={400} className='rounded-lg shadow-lg shadow-amber-950' />
                 </div>

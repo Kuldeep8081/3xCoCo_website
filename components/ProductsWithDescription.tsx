@@ -24,8 +24,8 @@ const products = [
 ]
 const ProductsWithDescription = () => {
     return (
-        <section className="max-w-7xl mx-auto px-6 py-16">
-            <h2 className="text-3xl font-serif text-[#d4af37] mb-8">Our Exquisite Chocolate Collection</h2>
+        <section className="max-w-7xl mx-auto px-auto py-16">
+            <h2 className="md:text-3xl text-lg font-serif font-bold text-[#d4af37] mb-8">Our Exquisite Chocolate Collection</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                 {products.map((product, index) => (
                     <Link
@@ -48,8 +48,8 @@ const ProductsWithDescription = () => {
                         >
                             <div className="relative h-64 w-full mb-4">
                                 <Image
-                                    width={"160"}
-                                    height={"160"}
+                                    width={"170"}
+                                    height={"170"}
                                     src={product.image}
                                     alt={product.name}
                                     className="object-cover w-full h-full rounded-lg hover:scale-105 transition-transform duration-500"
