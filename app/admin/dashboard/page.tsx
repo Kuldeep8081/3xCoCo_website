@@ -1,42 +1,74 @@
 import connectDB from "@/lib/db";
 import Order from "@/models/Order";
+import Product from "@/models/Product";
 import Link from "next/link";
-import { Delete, Plus } from "lucide-react";
+import { Trash2, Plus } from "lucide-react";
+import AdminOrderList from "@/components/AdminOrderList";
+import { Types } from "mongoose"; // Import Types for ObjectId
 
-// Force dynamic rendering so you always see new orders without rebuilding
+// Force dynamic rendering
 export const dynamic = "force-dynamic";
 
-type OrderItem = {
-  productId: string;
+// 1. Define Strict Interfaces for Raw Database Data
+interface ProductDoc {
+  _id: Types.ObjectId;
+  name: string;
+  image: string;
+  price: number;
+}
+
+interface OrderItemDoc {
+  _id: Types.ObjectId;
+  productId: ProductDoc | null; // Can be null if product deleted
   quantity: number;
-};
+}
 
-type AdminOrder = {
-  _id: string;
-  customerName?: string;
-  email?: string;
-  items?: OrderItem[];
+interface OrderDoc {
+  _id: Types.ObjectId;
+  customerName: string;
+  email: string;
+  items: OrderItemDoc[];
   totalAmount: number;
-  status: "Pending" | "Shipped" | "Delivered" | string;
-  createdAt?: string | Date;
-};
-
-async function getOrders(): Promise<AdminOrder[]> {
-  await connectDB();
-
-  const docs = await Order.find({})
-    .sort({ createdAt: -1 })
-    .lean<AdminOrder[]>();
-
-  // Ensure _id is a string
-  return docs.map((order) => ({
-    ...order,
-    _id: order._id.toString(),
-  }));
+  status: string;
+  isPaid: boolean;
+  createdAt: Date;
 }
 
 export default async function AdminDashboard() {
-  const orders = await getOrders();
+  await connectDB();
+
+  // 2. Fetch and Populate
+  const rawOrders = await Order.find({})
+    .populate({
+      path: "items.productId",
+      model: Product,
+      select: "name image price",
+    })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  // 3. Transform Raw Data to Serializable Props (No 'any' used)
+  const orders = (rawOrders as unknown as OrderDoc[]).map((order) => ({
+    _id: order._id.toString(),
+    customerName: order.customerName,
+    email: order.email,
+    totalAmount: order.totalAmount,
+    status: order.status,
+    isPaid: order.isPaid,
+    createdAt: order.createdAt.toISOString(),
+    items: order.items.map((item) => ({
+      _id: item._id.toString(),
+      quantity: item.quantity,
+      productId: item.productId
+        ? {
+            _id: item.productId._id.toString(),
+            name: item.productId.name,
+            image: item.productId.image,
+            price: item.productId.price,
+          }
+        : null,
+    })),
+  }));
 
   return (
     <div className="min-h-screen bg-linear-to-b from-coco-dark via-[#4b2e2b] to-coco-cream text-coco-cream">
@@ -76,89 +108,14 @@ export default async function AdminDashboard() {
               href="/admin/manage-products"
               className="bg-linear-to-r from-[#f6d18b] to-[#c8924b] text-[#3b241f] px-4 py-2 rounded-full text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md hover:shadow-lg hover:brightness-105 transition"
             >
-              <Delete size={16} /> Update Products
+              <Trash2 size={16} /> Update Products
             </Link>
           </div>
         </div>
 
-        {/* Orders Table Card */}
-        <div className="bg-[#fdf7f2]/95 text-[#3b241f] rounded-3xl shadow-2xl border border-[#e5c7a1]/70 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-[#3b241f] text-[#f3c894] uppercase text-[11px] tracking-[0.16em]">
-                <tr>
-                  <th className="p-4 sm:p-5">Order ID</th>
-                  <th className="p-4 sm:p-5">Customer</th>
-                  <th className="p-4 sm:p-5">Items</th>
-                  <th className="p-4 sm:p-5">Amount</th>
-                  <th className="p-4 sm:p-5">Status</th>
-                  <th className="p-4 sm:p-5">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#f0dec4]">
-                {orders.map((order) => (
-                  <tr
-                    key={order._id}
-                    className="hover:bg-[#f8ecdd] transition-colors"
-                  >
-                    <td className="p-4 sm:p-5 font-mono text-[11px] text-gray-500">
-                      {order._id.toString().slice(-6)}…
-                    </td>
+        {/* --- INTERACTIVE COMPONENT --- */}
+        <AdminOrderList initialOrders={orders} />
 
-                    <td className="p-4 sm:p-5 align-top">
-                      <div className="font-semibold text-sm">
-                        {order.customerName || "Unknown Customer"}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {order.email || "—"}
-                      </div>
-                    </td>
-
-                    <td className="p-4 sm:p-5 text-sm text-gray-700 align-top">
-                      {order.items?.length || 0} items
-                    </td>
-
-                    <td className="p-4 sm:p-5 font-bold text-[#3b241f] align-top">
-                      ₹{order.totalAmount}
-                    </td>
-
-                    <td className="p-4 sm:p-5 align-top">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold ${
-                          order.status === "Pending"
-                            ? "bg-amber-100 text-amber-800 border border-amber-200"
-                            : order.status === "Shipped"
-                            ? "bg-blue-100 text-blue-800 border border-blue-200"
-                            : "bg-green-100 text-green-800 border border-green-200"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-
-                    <td className="p-4 sm:p-5 text-xs text-gray-500 align-top">
-                      {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString()
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-
-                {orders.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="p-10 text-center text-gray-500 text-sm"
-                    >
-                      No orders found yet. Your chocolate kingdom is waiting for
-                      its first customer.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
       </main>
     </div>
   );

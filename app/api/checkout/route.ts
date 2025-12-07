@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import Razorpay from 'razorpay';
 import connectDB from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import User from '@/models/User';
 
-// 1. Define Interfaces for Type Safety
+// 1. Define Strict Interfaces
 interface CartItem {
   _id: string;
   quantity: number;
@@ -22,7 +25,13 @@ interface RequestBody {
   customerDetails: CustomerDetails;
 }
 
-// 2. Constants (Must match Frontend Logic)
+// Interface for the decoded JWT token
+interface DecodedToken extends JwtPayload {
+  id: string;
+  email: string;
+}
+
+// 2. Constants
 const FREE_SHIPPING_THRESHOLD = 999;
 const SHIPPING_FLAT = 79;
 
@@ -38,7 +47,34 @@ export async function POST(req: Request) {
     
     await connectDB();
 
-    // 4. Calculate Product Total Securely (Server-Side)
+    // --- CRITICAL FIX: FORCE LOGGED-IN EMAIL ---
+    let finalEmail = customerDetails.email; // Default to form input (guest)
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+
+    if (token) {
+      try {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) throw new Error("JWT_SECRET is not defined");
+
+        // Verify and cast to our specific token type
+        const decoded = jwt.verify(token, secret) as DecodedToken;
+        
+        // Fetch the REAL user from DB to ensure email matches exactly
+        const user = await User.findById(decoded.id);
+        if (user) {
+          finalEmail = user.email; // OVERRIDE form email with account email
+          console.log(`[Checkout] Linked order to user: ${finalEmail}`);
+        }
+      } catch (error) {
+        console.log(error);
+        console.log("Token invalid or user lookup failed, proceeding as guest.");
+      }
+    }
+    // -------------------------------------------
+
+    // 4. Calculate Product Total Securely
     const productIds = items.map((item) => item._id);
     const dbProducts = await Product.find({ _id: { $in: productIds } });
 
@@ -56,18 +92,17 @@ export async function POST(req: Request) {
 
       return { 
         productId: item._id, 
-        quantity: item.quantity,
+        quantity: item.quantity, 
         price: dbProduct.price 
       };
     });
 
-    // 5. Apply Coupon Logic (Server-Side Verification)
+    // 5. Apply Coupon & Shipping
     let discount = 0;
     if (customerDetails.couponCode === "CHOCO10") {
-      discount = productTotal * 0.10; // 10% Discount
+      discount = productTotal * 0.10;
     }
 
-    // 6. Apply Shipping Logic
     const amountAfterDiscount = productTotal - discount;
     let shipping = 0;
     
@@ -75,22 +110,20 @@ export async function POST(req: Request) {
       shipping = amountAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FLAT;
     }
 
-    // 7. Final Payable Amount
     const finalAmount = amountAfterDiscount + shipping;
 
-    // 8. Create "Pending" Order in MongoDB
+    // 6. Create Order
     const newOrder = await Order.create({
       customerName: customerDetails.name,
-      email: customerDetails.email,
+      email: finalEmail, // <--- USES THE FORCED EMAIL
       address: customerDetails.address,
-      totalAmount: finalAmount, // Save the final calculated amount
+      totalAmount: Math.round(finalAmount), 
       status: 'Pending',
       isPaid: false,
       items: dbItems,
     });
 
-    // 9. Generate Razorpay Order ID
-    // Razorpay expects amount in paise (integers only)
+    // 7. Generate Razorpay Order
     const amountInPaise = Math.round(finalAmount * 100);
 
     const razorpayOrder = await razorpay.orders.create({
@@ -100,14 +133,13 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({
-      orderId: newOrder._id, // Our DB ID
-      razorpayOrderId: razorpayOrder.id, // Razorpay's ID
-      amount: amountInPaise, // Send back the calculated amount to frontend
+      orderId: newOrder._id,
+      razorpayOrderId: razorpayOrder.id,
+      amount: amountInPaise,
       currency: 'INR'
     });
 
   } catch (error: unknown) {
-    // Type-safe error handling
     console.error("Checkout Error:", error);
     
     const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
