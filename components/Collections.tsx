@@ -6,14 +6,14 @@ import Product from "@/models/Product";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Fetch data directly in the Server Component
+// Fetch ALL data directly in the Server Component
 async function getProducts() {
   await connectDB();
 
+  // Find all products (Empty filter {})
   const products = await Product.find({}).lean();
 
-  // Debug log – check your server console to see what's coming back
-  console.log("[Collections] Fetched products:", products.length);
+  console.log("[Collections] Fetched total products:", products.length);
 
   return products.map((p: any) => ({
     ...p,
@@ -21,6 +21,7 @@ async function getProducts() {
   }));
 }
 
+// No props needed since we aren't using searchParams anymore
 export default async function Collections() {
   const products = await getProducts();
 
@@ -33,7 +34,7 @@ export default async function Collections() {
         <div className="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-[#7b4a34]" />
       </div>
 
-      {/* Product Grid - Responsive */}
+      {/* Product Grid */}
       <section
         id="shop"
         className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20"
