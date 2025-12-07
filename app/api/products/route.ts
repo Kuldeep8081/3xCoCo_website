@@ -1,20 +1,23 @@
-import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import Product from '@/models/Product';
+import { NextRequest, NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import Product from "@/models/Product";
 
-// Define the Context Type specifically for Next.js 15
+// Correct context type for route handlers
 type RouteContext = {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 };
 
 // 1. GET: Fetch a single product
-export async function GET(req: Request, context: RouteContext) {
+export async function GET(
+  _req: NextRequest,
+  context: RouteContext
+) {
   try {
     await connectDB();
-    
-    // Await the params from the context
-    const { id } = await context.params;
-    
+
+    // params is NOT a Promise here
+    const { id } = context.params;
+
     const product = await Product.findById(id);
 
     if (!product) {
@@ -29,16 +32,19 @@ export async function GET(req: Request, context: RouteContext) {
 }
 
 // 2. PUT: Update a product
-export async function PUT(req: Request, context: RouteContext) {
+export async function PUT(
+  req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { id } = await context.params;
+    const { id } = context.params;
     const body = await req.json();
 
     await connectDB();
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, body, { 
-      new: true, 
-      runValidators: true 
+    const updatedProduct = await Product.findByIdAndUpdate(id, body, {
+      new: true,
+      runValidators: true,
     });
 
     if (!updatedProduct) {
@@ -53,9 +59,13 @@ export async function PUT(req: Request, context: RouteContext) {
 }
 
 // 3. DELETE: Remove a product
-export async function DELETE(req: Request, context: RouteContext) {
+export async function DELETE(
+  _req: NextRequest,
+  context: RouteContext
+) {
   try {
-    const { id } = await context.params;
+    const { id } = context.params;
+
     await connectDB();
 
     const deletedProduct = await Product.findByIdAndDelete(id);
