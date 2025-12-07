@@ -2,21 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
 
-// Correct context type for route handlers
-type RouteContext = {
-  params: { id: string };
-};
+type RouteParams = { id: string };
 
-// 1. GET: Fetch a single product
+// GET /api/products/[id]
 export async function GET(
   _req: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteParams> }
 ) {
   try {
     await connectDB();
 
-    // params is NOT a Promise here
-    const { id } = context.params;
+    const { id } = await context.params;
 
     const product = await Product.findById(id);
 
@@ -31,13 +27,13 @@ export async function GET(
   }
 }
 
-// 2. PUT: Update a product
+// PUT /api/products/[id]
 export async function PUT(
   req: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteParams> }
 ) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
     const body = await req.json();
 
     await connectDB();
@@ -58,13 +54,13 @@ export async function PUT(
   }
 }
 
-// 3. DELETE: Remove a product
+// DELETE /api/products/[id]
 export async function DELETE(
   _req: NextRequest,
-  context: RouteContext
+  context: { params: Promise<RouteParams> }
 ) {
   try {
-    const { id } = context.params;
+    const { id } = await context.params;
 
     await connectDB();
 
