@@ -2,39 +2,76 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 
-// GET: List all chocolates (Public)
-export async function GET() {
+// 1. GET: Fetch a single product
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
-    const products = await Product.find({});
-    return NextResponse.json(products);
+    const { id } = await params;
+    
+    const product = await Product.findById(id);
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(product);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    // FIX: Log the error so the variable is "used"
+    console.error("Fetch product error:", error); 
+    return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
   }
 }
 
-// POST: Add a new chocolate (Admin Only)
-export async function POST(req: Request) {
+// 2. PUT: Update a product
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    await connectDB();
+    const { id } = await params;
     const body = await req.json();
 
-    // Basic validation
-    if (!body.name || !body.price || !body.image) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    await connectDB();
 
-    const newProduct = await Product.create({
-      name: body.name,
-      description: body.description,
-      price: body.price,
-      image: body.image,
-      category: body.category || 'Standard',
-      stock: body.stock || 10
+    const updatedProduct = await Product.findByIdAndUpdate(id, body, { 
+      new: true, 
+      runValidators: true 
     });
 
-    return NextResponse.json({ message: "Product Created", product: newProduct }, { status: 201 });
+    if (!updatedProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedProduct);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    // FIX: Log the error so the variable is "used"
+    console.error("Update product error:", error);
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
+  }
+}
+
+// 3. DELETE: Remove a product
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    await connectDB();
+
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    // FIX: Log the error so the variable is "used"
+    console.error("Delete product error:", error);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
   }
 }
