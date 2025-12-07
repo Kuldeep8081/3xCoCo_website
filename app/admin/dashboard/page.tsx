@@ -6,11 +6,37 @@ import { Delete, Plus } from "lucide-react";
 // Force dynamic rendering so you always see new orders without rebuilding
 export const dynamic = "force-dynamic";
 
-export default async function AdminDashboard() {
+type OrderItem = {
+  productId: string;
+  quantity: number;
+};
+
+type AdminOrder = {
+  _id: string;
+  customerName?: string;
+  email?: string;
+  items?: OrderItem[];
+  totalAmount: number;
+  status: "Pending" | "Shipped" | "Delivered" | string;
+  createdAt?: string | Date;
+};
+
+async function getOrders(): Promise<AdminOrder[]> {
   await connectDB();
 
-  // Fetch orders, newest first. .lean() makes it faster plain JSON
-  const orders = await Order.find({}).sort({ createdAt: -1 }).lean();
+  const docs = await Order.find({})
+    .sort({ createdAt: -1 })
+    .lean<AdminOrder[]>();
+
+  // Ensure _id is a string
+  return docs.map((order) => ({
+    ...order,
+    _id: order._id.toString(),
+  }));
+}
+
+export default async function AdminDashboard() {
+  const orders = await getOrders();
 
   return (
     <div className="min-h-screen bg-linear-to-b from-coco-dark via-[#4b2e2b] to-coco-cream text-coco-cream">
@@ -70,7 +96,7 @@ export default async function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f0dec4]">
-                {orders.map((order: any) => (
+                {orders.map((order) => (
                   <tr
                     key={order._id}
                     className="hover:bg-[#f8ecdd] transition-colors"
