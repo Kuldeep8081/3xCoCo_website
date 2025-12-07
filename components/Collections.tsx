@@ -1,14 +1,15 @@
 import ProductCard from "@/components/ProductCard";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
+import { Types } from "mongoose"; // 1. Import Mongoose Types
 
 // Ensure this runs on Node.js (for Mongoose) and is always dynamic
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// 1. Define the shape of the data coming from MongoDB
+// 2. Define the exact shape of the raw MongoDB document
 interface ProductDoc {
-  _id: any; // Mongoose ObjectId
+  _id: Types.ObjectId; // Strictly typed as ObjectId, not 'any'
   name: string;
   price: number;
   image: string;
@@ -16,7 +17,7 @@ interface ProductDoc {
   category?: string;
 }
 
-// 2. Define the shape of the data after we convert _id to string
+// 3. Define the shape of the data for the frontend (serialized)
 interface SerializedProduct {
   _id: string;
   name: string;
@@ -24,21 +25,22 @@ interface SerializedProduct {
   image: string;
 }
 
-// Fetch ALL data directly in the Server Component
 async function getProducts(): Promise<SerializedProduct[]> {
   await connectDB();
 
-  // Find all products
   const rawProducts = await Product.find({}).lean();
 
   console.log("[Collections] Fetched total products:", rawProducts.length);
 
-  // 3. Cast rawProducts to our interface to avoid 'any'
+  // 4. Cast the raw result to our strict ProductDoc interface
   const products = rawProducts as unknown as ProductDoc[];
 
+  // 5. Transform ObjectId to string for the frontend
   return products.map((p) => ({
-    ...p,
-    _id: p._id.toString(), // Convert ObjectId to string
+    _id: p._id.toString(), 
+    name: p.name,
+    price: p.price,
+    image: p.image,
   }));
 }
 
@@ -74,7 +76,6 @@ export default async function Collections() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 sm:gap-8">
           {products.length > 0 ? (
-            // 4. TypeScript now knows 'product' is of type 'SerializedProduct' automatically
             products.map((product) => (
               <ProductCard
                 key={product._id}
