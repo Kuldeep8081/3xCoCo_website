@@ -20,9 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${lato.variable}`}>
       <body className="font-sans">
-        <Navbar/>
+        <Navbar />
         {children}
-        <Footer />
+        <Footer/>
         </body>
     </html>
   );

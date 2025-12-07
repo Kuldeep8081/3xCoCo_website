@@ -1,0 +1,74 @@
+import ProductCard from "@/components/ProductCard";
+import connectDB from "@/lib/db";
+import Product from "@/models/Product";
+
+// Ensure this runs on Node.js (for Mongoose) and is always dynamic
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+// Fetch data directly in the Server Component
+async function getProducts() {
+  await connectDB();
+
+  const products = await Product.find({}).lean();
+
+  // Debug log – check your server console to see what's coming back
+  console.log("[Collections] Fetched products:", products.length);
+
+  return products.map((p: any) => ({
+    ...p,
+    _id: p._id.toString(), // Convert ObjectId to string
+  }));
+}
+
+export default async function Collections() {
+  const products = await getProducts();
+
+  return (
+    <main className="min-h-screen bg-linear-to-b from-coco-dark via-[#4b2e2b] to-coco-cream text-coco-cream">
+      {/* Background chocolate blobs */}
+      <div className="pointer-events-none fixed inset-0 opacity-20 mix-blend-multiply">
+        <div className="absolute -top-16 -left-10 w-40 h-40 rounded-full bg-[#3b241f]" />
+        <div className="absolute top-32 right-10 w-64 h-64 rounded-full bg-[#5a362f]" />
+        <div className="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-[#7b4a34]" />
+      </div>
+
+      {/* Product Grid - Responsive */}
+      <section
+        id="shop"
+        className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16 md:py-20"
+      >
+        <div className="text-center mb-10 sm:mb-12">
+          <p className="text-xs uppercase tracking-[0.25em] text-[#f3c894]/80">
+            Collections
+          </p>
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#fdf7f2] mt-2">
+            Our Chocolate Collection
+          </h2>
+          <p className="mt-2 text-sm text-[#fbe0c3]/85 max-w-xl mx-auto">
+            Explore handcrafted dark, milk, white and truffle chocolates,
+            curated for every cocoa lover.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 sm:gap-8">
+          {products.length > 0 ? (
+            products.map((product: any) => (
+              <ProductCard
+                key={product._id}
+                id={product._id}
+                name={product.name}
+                price={product.price}
+                image={product.image}
+              />
+            ))
+          ) : (
+            <p className="text-center col-span-full text-sm text-[#fbe0c3]/80">
+              No chocolates found. Time to add some sweetness to the shop.
+            </p>
+          )}
+        </div>
+      </section>
+    </main>
+  );
+}

@@ -1,16 +1,26 @@
-
+import React from 'react';
 import Hero from '@/components/Hero';
-import ProductSection from '@/components/ProductSection';
+import Collections from '@/components/Collections';
 import FeatureSection from '@/components/FeatureSection';
 
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<{ query?: string }>;
+}) {
 
-// --- MAIN PAGE ---
-export default function Home() {
+
   return (
-    <main className="min-h-screen bg-[#2b1b17] selection:bg-[#d4af37] selection:text-[#2b1b17]">
+    <div className="bg-coco-cream min-h-screen flex flex-col">
+      {/* Hero Section (Banner) */}
       <Hero />
-      <ProductSection />
+
+      {/* Collections (Categories like Dark, Milk, White) */}
+      <Collections searchParams={searchParams}/>
+
+      {/* Feature Section (Marketing/About) */}
       <FeatureSection />
-    </main>
+
+    </div>
   );
 }

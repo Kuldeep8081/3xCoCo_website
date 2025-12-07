@@ -1,12 +1,11 @@
-import ProductSection from '@/components/ProductSection'
+import Collections from '@/components/Collections'
 import React from 'react'
 
 const page = () => {
-    
   return (
-    <>
-    <ProductSection/>
-    </>
+    <div>
+        <Collections />
+    </div>
   )
 }
 

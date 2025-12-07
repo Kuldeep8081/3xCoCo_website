@@ -1,7 +1,6 @@
 'use client';
 
 import { motion } from 'framer-motion';
-
 const Hero = () => {
     return (
         <section className="relative h-screen flex items-center justify-center overflow-hidden">
