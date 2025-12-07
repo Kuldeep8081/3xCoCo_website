@@ -6,22 +6,42 @@ import Product from "@/models/Product";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// 1. Define the shape of the data coming from MongoDB
+interface ProductDoc {
+  _id: any; // Mongoose ObjectId
+  name: string;
+  price: number;
+  image: string;
+  description?: string;
+  category?: string;
+}
+
+// 2. Define the shape of the data after we convert _id to string
+interface SerializedProduct {
+  _id: string;
+  name: string;
+  price: number;
+  image: string;
+}
+
 // Fetch ALL data directly in the Server Component
-async function getProducts() {
+async function getProducts(): Promise<SerializedProduct[]> {
   await connectDB();
 
-  // Find all products (Empty filter {})
-  const products = await Product.find({}).lean();
+  // Find all products
+  const rawProducts = await Product.find({}).lean();
 
-  console.log("[Collections] Fetched total products:", products.length);
+  console.log("[Collections] Fetched total products:", rawProducts.length);
 
-  return products.map((p: any) => ({
+  // 3. Cast rawProducts to our interface to avoid 'any'
+  const products = rawProducts as unknown as ProductDoc[];
+
+  return products.map((p) => ({
     ...p,
     _id: p._id.toString(), // Convert ObjectId to string
   }));
 }
 
-// No props needed since we aren't using searchParams anymore
 export default async function Collections() {
   const products = await getProducts();
 
@@ -54,7 +74,8 @@ export default async function Collections() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7 sm:gap-8">
           {products.length > 0 ? (
-            products.map((product: any) => (
+            // 4. TypeScript now knows 'product' is of type 'SerializedProduct' automatically
+            products.map((product) => (
               <ProductCard
                 key={product._id}
                 id={product._id}
