@@ -1,78 +1,42 @@
-import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import Product from "@/models/Product";
+import { NextResponse } from 'next/server';
+import connectDB from '@/lib/db';
+import Product from '@/models/Product';
 
-type RouteParams = { id: string };
-
-// GET /api/products/[id]
-export async function GET(
-  _req: NextRequest,
-  context: { params: Promise<RouteParams> }
-) {
+// GET: List all chocolates (Public)
+export async function GET() {
   try {
     await connectDB();
-
-    const { id } = await context.params;
-
-    const product = await Product.findById(id);
-
-    if (!product) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(product);
+    const products = await Product.find({});
+    return NextResponse.json(products);
   } catch (error) {
-    console.error("Fetch product error:", error);
-    return NextResponse.json({ error: "Fetch failed" }, { status: 500 });
+    console.error("Fetch Products Error:", error); // FIX: Log the error
+    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
   }
 }
 
-// PUT /api/products/[id]
-export async function PUT(
-  req: NextRequest,
-  context: { params: Promise<RouteParams> }
-) {
+// POST: Add a new chocolate (Admin Only)
+export async function POST(req: Request) {
   try {
-    const { id } = await context.params;
+    await connectDB();
     const body = await req.json();
 
-    await connectDB();
+    // Basic validation
+    if (!body.name || !body.price || !body.image) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, body, {
-      new: true,
-      runValidators: true,
+    const newProduct = await Product.create({
+      name: body.name,
+      description: body.description,
+      price: body.price,
+      image: body.image,
+      category: body.category || 'Standard',
+      stock: body.stock || 10
     });
 
-    if (!updatedProduct) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(updatedProduct);
+    return NextResponse.json({ message: "Product Created", product: newProduct }, { status: 201 });
   } catch (error) {
-    console.error("Update product error:", error);
-    return NextResponse.json({ error: "Update failed" }, { status: 500 });
-  }
-}
-
-// DELETE /api/products/[id]
-export async function DELETE(
-  _req: NextRequest,
-  context: { params: Promise<RouteParams> }
-) {
-  try {
-    const { id } = await context.params;
-
-    await connectDB();
-
-    const deletedProduct = await Product.findByIdAndDelete(id);
-
-    if (!deletedProduct) {
-      return NextResponse.json({ error: "Product not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ message: "Product deleted successfully" });
-  } catch (error) {
-    console.error("Delete product error:", error);
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+    console.error("Create Product Error:", error); // FIX: Log the error
+    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
   }
 }

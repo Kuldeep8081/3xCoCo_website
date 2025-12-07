@@ -1,11 +1,12 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react"; // 1. Import Suspense
 import { useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import Link from "next/link";
 
-export default function SuccessPage() {
+// 2. Rename the main logic to 'SuccessContent'
+function SuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const clearCart = useCartStore((state) => state.clearCart);
@@ -18,12 +19,12 @@ export default function SuccessPage() {
   }, [orderId, clearCart]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-coco-dark via-[#4b2e2b] to-coco-cream text-coco-cream flex items-center justify-center p-6">
+    <div className="min-h-screen bg-linear-to-b from-coco-dark via-[#4b2e2b] to-coco-cream text-coco-cream flex items-center justify-center p-6">
       {/* Background cocoa blobs */}
       <div className="pointer-events-none fixed inset-0 opacity-20 mix-blend-multiply">
         <div className="absolute -top-16 -left-10 w-40 h-40 rounded-full bg-[#3b241f]" />
-        <div className="absolute top-32 right-[-40px] w-64 h-64 rounded-full bg-[#5a362f]" />
-        <div className="absolute bottom-[-40px] left-10 w-48 h-48 rounded-full bg-[#7b4a34]" />
+        <div className="absolute top-32 right-10 w-64 h-64 rounded-full bg-[#5a362f]" />
+        <div className="absolute bottom-10 left-10 w-48 h-48 rounded-full bg-[#7b4a34]" />
       </div>
 
       <div className="relative bg-[#fdf7f2]/95 backdrop-blur-sm p-10 rounded-3xl shadow-2xl border border-[#e5c7a1]/60 max-w-md w-full text-center">
@@ -49,7 +50,7 @@ export default function SuccessPage() {
 
         <Link
           href="/"
-          className="block w-full py-3 rounded-full bg-gradient-to-r from-[#4b2e2b] via-[#6b3b2e] to-[#c8924b] text-white font-semibold text-sm shadow-md hover:shadow-lg hover:brightness-105 transition"
+          className="block w-full py-3 rounded-full bg-linear-to-r from-[#4b2e2b] via-[#6b3b2e] to-[#c8924b] text-white font-semibold text-sm shadow-md hover:shadow-lg hover:brightness-105 transition"
         >
           Continue Shopping
         </Link>
@@ -60,5 +61,18 @@ export default function SuccessPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+// 3. Export the Suspense Wrapper
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-linear-to-b from-coco-dark via-[#4b2e2b] to-coco-cream flex items-center justify-center">
+        <p className="text-[#fdf7f2] animate-pulse">Verifying Payment...</p>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }

@@ -1,26 +1,31 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react"; // 1. Import Suspense
 import { Search as SearchIcon, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
-export default function Search() {
+// 2. Rename the main logic to 'SearchContent'
+function SearchContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
 
   const [query, setQuery] = useState(searchParams.get("query") || "");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Array<{ _id: string; name: string; price: number; image: string }>>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams);
-    query ? params.set("query", query) : params.delete("query");
-    replace(`${pathname}?${params}`);
+    const params = new URLSearchParams(searchParams.toString()); // Fix: toString() for safety
+    if (query) {
+      params.set("query", query);
+    } else {
+      params.delete("query");
+    }
+    replace(`${pathname}?${params.toString()}`);
     setIsOpen(false);
   };
 
@@ -28,9 +33,9 @@ export default function Search() {
     setQuery("");
     setResults([]);
     setIsOpen(false);
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.delete("query");
-    replace(`${pathname}?${params}`);
+    replace(`${pathname}?${params.toString()}`);
   };
 
   // Debounce
@@ -136,5 +141,14 @@ export default function Search() {
         </div>
       )}
     </div>
+  );
+}
+
+// 3. Export a Suspense-wrapped version
+export default function Search() {
+  return (
+    <Suspense fallback={<div className="w-full max-w-md mx-auto h-12 bg-[#3B1E11]/50 rounded-full animate-pulse" />}>
+      <SearchContent />
+    </Suspense>
   );
 }

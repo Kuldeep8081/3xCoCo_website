@@ -3,11 +3,7 @@ import Hero from '@/components/Hero';
 import Collections from '@/components/Collections';
 import FeatureSection from '@/components/FeatureSection';
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams?: Promise<{ query?: string }>;
-}) {
+export default async function Home() {
 
 
   return (
@@ -16,7 +12,7 @@ export default async function Home({
       <Hero />
 
       {/* Collections (Categories like Dark, Milk, White) */}
-      <Collections searchParams={searchParams}/>
+      <Collections/>
 
       {/* Feature Section (Marketing/About) */}
       <FeatureSection />

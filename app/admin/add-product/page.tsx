@@ -1,8 +1,9 @@
 "use client";
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
-export default function AddProduct() {
+function AddProductContent() {
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
@@ -160,4 +161,12 @@ export default function AddProduct() {
       </div>
     </div>
   );
+}
+
+export default function AddProductPage() {
+  return (
+    <Suspense fallback={<div>Loading Form...</div>}>
+      <AddProductContent />
+    </Suspense>
+  )
 }
