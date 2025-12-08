@@ -7,7 +7,7 @@ export default async function Home() {
 
 
   return (
-    <div className="bg-coco-cream min-h-screen flex flex-col">
+    <div className="">
       {/* Hero Section (Banner) */}
       <Hero />
 

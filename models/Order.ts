@@ -14,6 +14,8 @@ const OrderSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+
+  mobile: { type: String },
   
   // Payment & Total
   totalAmount: { 

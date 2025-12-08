@@ -16,6 +16,7 @@ interface CartItem {
 interface CustomerDetails {
   name: string;
   email: string;
+  mobile: string;
   address: string;
   couponCode?: string | null;
 }
@@ -114,8 +115,10 @@ export async function POST(req: Request) {
 
     // 6. Create Order
     const newOrder = await Order.create({
+
       customerName: customerDetails.name,
       email: finalEmail, // <--- USES THE FORCED EMAIL
+      mobile: customerDetails.mobile,
       address: customerDetails.address,
       totalAmount: Math.round(finalAmount), 
       status: 'Pending',
