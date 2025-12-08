@@ -5,30 +5,44 @@ import { ShoppingCart, Zap, Loader2 } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useRouter } from "next/navigation";
 
-export default function ProductActions({ product }: { product: any }) {
+interface Product {
+  _id: string;
+  name: string;
+  price: number;
+  image: string;
+  description?: string;
+  category?: string;
+}
+
+interface ProductActionsProps {
+  product: Product;
+  isCard?: boolean; // New prop to toggle styles
+}
+
+export default function ProductActions({ product, isCard = false }: ProductActionsProps) {
   const addItem = useCartStore((state) => state.addItem);
   const router = useRouter();
   const [added, setAdded] = useState(false);
-  const [loading, setLoading] = useState(false); // To show spinner while checking auth
+  const [loading, setLoading] = useState(false);
 
-  // Helper function to check if user is logged in
   const checkAuth = async () => {
     try {
-      // We try to hit a protected route. 
-      // If it returns 200/OK, we are logged in. If 401, we are not.
-      const res = await fetch("/api/orders/my-orders"); 
-      if (!res.ok) {
-        throw new Error("Not logged in");
-      }
+      const res = await fetch("/api/orders/my-orders");
+      if (!res.ok) throw new Error("Not logged in");
       return true;
     } catch (error) {
-      // If check fails, redirect to login
       router.push("/login");
       return false;
     }
   };
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = async (e?: React.MouseEvent) => {
+    // Prevent link navigation if clicking inside a card
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     setLoading(true);
     const isLoggedIn = await checkAuth();
     setLoading(false);
@@ -36,11 +50,17 @@ export default function ProductActions({ product }: { product: any }) {
     if (isLoggedIn) {
       addItem(product);
       setAdded(true);
-      setTimeout(() => setAdded(false), 2000);
+      if (isCard) alert("Added to cart!"); // Simple feedback for card
+      else setTimeout(() => setAdded(false), 2000); // Button animation for page
     }
   };
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     setLoading(true);
     const isLoggedIn = await checkAuth();
     setLoading(false);
@@ -51,11 +71,36 @@ export default function ProductActions({ product }: { product: any }) {
     }
   };
 
+  // --- RENDER SMALL BUTTONS (For Card) ---
+  if (isCard) {
+    return (
+      <div className="flex gap-2 mt-3 w-full">
+        <button
+          onClick={handleAddToCart}
+          disabled={loading}
+          className="flex-1 inline-flex justify-center items-center px-3 py-2 rounded-lg text-[10px] uppercase font-bold tracking-wider border border-[#c8924b] text-[#c8924b] hover:bg-[#c8924b] hover:text-white transition disabled:opacity-50"
+        >
+          {loading ? <Loader2 size={14} className="animate-spin" /> : <ShoppingCart size={14} />}
+          <span className="ml-1 hidden sm:inline">Add</span>
+        </button>
+
+        <button
+          onClick={handleBuyNow}
+          disabled={loading}
+          className="flex-1 inline-flex justify-center items-center px-3 py-2 rounded-lg text-[10px] uppercase font-bold tracking-wider bg-linear-to-r from-[#4b2e2b] via-[#6b3b2e] to-[#c8924b] text-white shadow-sm hover:shadow-md hover:brightness-110 transition disabled:opacity-50"
+        >
+          <Zap size={14} />
+          <span className="ml-1">Buy</span>
+        </button>
+      </div>
+    );
+  }
+
+  // --- RENDER LARGE BUTTONS (For Product Page - Default) ---
   return (
     <div className="flex flex-col sm:flex-row gap-10 pt-2">
-      {/* Add to Cart */}
       <button
-        onClick={handleAddToCart}
+        onClick={() => handleAddToCart()}
         disabled={loading}
         className="flex-1 rounded-full font-semibold text-sm tracking-wide py-3 px-6 flex items-center justify-center gap-2 bg-linear-to-r from-[#f6d18b] to-[#c8924b] text-[#3b241f] shadow-md border border-[#e5c7a1]/60 hover:shadow-lg hover:brightness-105 transition disabled:opacity-70 disabled:cursor-not-allowed"
       >
@@ -63,9 +108,8 @@ export default function ProductActions({ product }: { product: any }) {
         {loading ? "Checking..." : added ? "Added!" : "Add to Cart"}
       </button>
 
-      {/* Buy Now */}
       <button
-        onClick={handleBuyNow}
+        onClick={() => handleBuyNow()}
         disabled={loading}
         className="flex-1 rounded-full font-semibold text-sm tracking-wide py-3 px-6 flex items-center justify-center gap-2 border-2 border-[#4b2e2b] text-[#4b2e2b] bg-[#fffaf5] hover:bg-[#4b2e2b] hover:text-white shadow-sm transition disabled:opacity-70 disabled:cursor-not-allowed"
       >

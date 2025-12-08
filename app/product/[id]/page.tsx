@@ -134,7 +134,7 @@ export default async function ProductPage({
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4 pt-1">
               {/* Client Component for Interactivity */}
-              <ProductActions product={product} />
+              <ProductActions product={product} isCard={false} />
             </div>
 
             {/* Additional Info */}
