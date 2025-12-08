@@ -1,96 +1,68 @@
-## 🍫 3XCoCo - Luxury Chocolate E-commerce
-A full-stack, responsive e-commerce application built with Next.js 15 (App Router), MongoDB, and Razorpay for payment processing. This project features a unified architecture where the frontend and backend live in a single repository, offering a seamless shopping experience for customers and a robust dashboard for administrators.
+# 🍫 3XCoCo | Luxury Handcrafted Chocolates
+
+
+
+**3XCoCo** is a full-stack, production-ready e-commerce platform built with **Next.js 15** and **TypeScript**. It features a unified server-client architecture, real-time payment processing, and a comprehensive admin dashboard for inventory and order management.
+
+**Deployment link:** https://3x-co-co-website.vercel.app/
+
+---
+
 ## 🚀 Features
 
-## 🛒 Customer Experience
-##### Modern UI/UX: 
-Responsive design with Tailwind CSS, featuring "Dark & Moody" luxury aesthetics.
+### 🛒 Customer Experience
+- **🛍️ Storefront:** Responsive, luxury aesthetic design using Tailwind CSS.
+- **🔍 Advanced Search:** Live search with debounced typeahead and filtering.
+- **🛒 Smart Cart:** Persistent shopping cart powered by **Zustand** with quantity controls and "Buy Now" vs "Add to Cart" logic.
+- **📍 Auto-Location:** One-click address filling using Browser Geolocation & OpenStreetMap API.
+- **💳 Secure Checkout:** Integrated **Razorpay** payment gateway with coupon code system (`CHOCO10` for 10% off).
+- **📦 Order Tracking:** Real-time order status tracking (Pending → Shipped → Delivered) via the "My Orders" dashboard.
+- **🔔 Push Notifications:** Web Push Notifications for order updates (Shipped/Delivered).
 
-##### Product Discovery: 
-Browse collections, filter by category, and Live Search with typeahead suggestions.
+### 🛡️ Admin Dashboard
+- **📊 Overview:** Track total sales and order volume.
+- **📦 Order Management:** Visual order cards with "Ship" and "Deliver" actions.
+- **🍫 Inventory Management:** Add, Edit, and Delete products with drag-and-drop image uploads via **Cloudinary**.
+- **🔔 Admin Alerts:** Receive push notifications immediately when a new order is placed.
 
-##### Smart Cart: 
-Zustand-powered cart with persistent storage, quantity controls (+/-), and coupon code support.
-
-###### Checkout: 
-Seamless integration with Razorpay for secure payments.
-
-###### Auto-Address: 
-One-click address filling using Browser Geolocation & OpenStreetMap API.
-
-###### Order Tracking: 
-"My Orders" section to track shipping status (Pending → Shipped → Delivered).
-
-###### Secure Auth: 
-JWT-based authentication with HttpOnly cookies for Login, Registration, and Forgot Password flows
-
-##🛡️ Admin Dashboard
-##### Product Management: 
-Add, Edit, and Delete products via a visual interface.
-
-##### Image Uploads: 
-Drag-and-drop image uploads powered by Cloudinary.
-
-##### Order Management: 
-View all customer orders and update shipping statuses.
-
-##### Analytics: 
-Quick view of total sales and order counts.
+---
 
 ## 🛠️ Tech Stack
-##### Framework: 
-Next.js 15 (App Router, Server Actions, API Routes)
 
-##### Language: 
-TypeScript
+- **Frontend:** Next.js 15 (App Router), React, Tailwind CSS, Lucide Icons
+- **Backend:** Next.js API Routes, Node.js
+- **Database:** MongoDB (Mongoose ODM)
+- **State Management:** Zustand
+- **Authentication:** JSON Web Tokens (JWT) with HttpOnly Cookies
+- **Payments:** Razorpay Gateway
+- **Media Storage:** Cloudinary
+- **Notifications:** Web Push Protocol (VAPID)
 
-##### Database: 
-MongoDB (via Mongoose)
-
-##### Styling: 
-Tailwind CSS, Lucide React (Icons)
-
-##### State Management: 
-Zustand
-
-##### Payments: 
-Razorpay
-
-##### Media: 
-Cloudinary (Uploads))
-
-##### Auth: 
-JSON Web Tokens (JWT), Bcrypt.js, Nodemailer
+---
 
 ## 🏗️ Getting Started
+
 Follow these steps to set up the project locally.
 
-### Prerequisites
-Node.js (v18+)
-
-- MongoDB Atlas Account (or local MongoDB)
-
-- Razorpay Account (Test Mode)
-
-- Cloudinary Account
-
-#### Clone the Repository
+### 1. Clone the Repository
 ```
-git clone https://github.com/your-username/3xcoco.git
+git clone [https://github.com/your-username/3xcoco.git](https://github.com/your-username/3xcoco.git)
 cd 3xcoco
 ```
-#### Install Dependencies
+
+### 2. Install Dependencies
 ```
 npm install
 ```
-#### Configure Environment Variables
-Create a file named .env.local in the root directory and add the following keys:
+
+### 3. Configure Environment Variables
+Create a **.env.local** file in the root directory and populate it with your keys:
 ```
 # --- Database ---
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/3xcoco
 
 # --- Authentication ---
-JWT_SECRET=your_super_secret_jwt_key
+JWT_SECRET=your_super_secret_key
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 # --- Payments (Razorpay) ---
@@ -102,37 +74,28 @@ NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxx
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
 NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_unsigned_preset
 
-# --- Email Services (Gmail App Password) ---
+# --- Push Notifications (VAPID) ---
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=your_vapid_public_key
+VAPID_PRIVATE_KEY=your_vapid_private_key
+VAPID_SUBJECT=mailto:admin@3xcoco.com
+
+# --- Email (Gmail App Password) ---
 SMTP_EMAIL=your-email@gmail.com
 SMTP_PASSWORD=your_app_password
 ```
-### Seed the Database
-visit http://localhost:3000/api/seed in your browser if you haven't set up the script.
-
-#### Run the Server
+### Run the Server
 ```
 npm run dev
 ```
-Open http://localhost:3000 to view the app.
+## 🧪 How to Test
+- **Register a User:** Sign up for a new account.
 
-## 💳 Testing Payments (Razorpay)
-Since the app is in Test Mode:
+- **Make Admin:** Manually update the user's role to admin in MongoDB.
 
-Add items to the cart and proceed to checkout.
+- **Shop:** Add items to cart as a user and checkout using Razorpay (Test Mode).
 
-In the Razorpay popup, choose Netbanking.
+- **Manage:** Log in as Admin to view the order and mark it as "Shipped".
 
-Select any test bank (e.g., "Test Bank").
+- **Notifications:** Ensure you clicked the "Get Updates" bell icon to receive alerts.
 
-The payment will succeed, and you will be redirected to the Success page.
 
-## 🛡️ Admin Access
-To access the admin panel:
-
-Register a new user account.
-
-Manually update the user's role to "admin" in your MongoDB database (users collection).
-
-Log out and log back in.
-
-Navigate to /admin/dashboard.
