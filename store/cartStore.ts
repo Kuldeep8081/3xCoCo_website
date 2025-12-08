@@ -39,6 +39,7 @@ export const useCartStore = create<CartState>()(
                 : item
             ),
           });
+          
         } else {
           // Add new item
           set({ items: [...currentItems, { ...product, quantity: 1 }] });

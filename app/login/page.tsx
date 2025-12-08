@@ -2,25 +2,40 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react"; // Import Loader
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false); // Initial state false
+  const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
-    if (res.ok) {
-      window.location.href = "/";
-    } else {
-      alert("Invalid credentials");
+      if (res.ok) {
+        // Successful login
+        // Use window.location.href to force a full refresh so Navbar updates Auth state
+        window.location.href = "/";
+      } else {
+        const data = await res.json();
+        alert(data.error || "Invalid credentials");
+        setLoading(false); // Only stop loading on error
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Please try again.");
+      setLoading(false);
     }
   };
 
@@ -65,7 +80,8 @@ export default function Login() {
                   type="email"
                   placeholder="you@cocoalover.com"
                   required
-                  className="w-full p-3 rounded-lg border border-[#e5c7a1] bg-[#fffaf5] text-[#3b241f] text-sm focus:outline-none focus:ring-2 focus:ring-[#c8924b] focus:border-transparent placeholder:text-[#c1a38a] transition"
+                  disabled={loading}
+                  className="w-full p-3 rounded-lg border border-[#e5c7a1] bg-[#fffaf5] text-[#3b241f] text-sm focus:outline-none focus:ring-2 focus:ring-[#c8924b] focus:border-transparent placeholder:text-[#c1a38a] transition disabled:opacity-60"
                   onChange={(e) =>
                     setForm({ ...form, email: e.target.value })
                   }
@@ -85,7 +101,8 @@ export default function Login() {
                   type="password"
                   placeholder="Enter your secret recipe"
                   required
-                  className="w-full p-3 rounded-lg border border-[#e5c7a1] bg-[#fffaf5] text-[#3b241f] text-sm focus:outline-none focus:ring-2 focus:ring-[#c8924b] focus:border-transparent placeholder:text-[#c1a38a] transition"
+                  disabled={loading}
+                  className="w-full p-3 rounded-lg border border-[#e5c7a1] bg-[#fffaf5] text-[#3b241f] text-sm focus:outline-none focus:ring-2 focus:ring-[#c8924b] focus:border-transparent placeholder:text-[#c1a38a] transition disabled:opacity-60"
                   onChange={(e) =>
                     setForm({ ...form, password: e.target.value })
                   }
@@ -105,7 +122,7 @@ export default function Login() {
                 <button
                   type="button"
                   className="hover:underline hover:text-[#c8924b]"
-                  onClick={() => window.location.href = '/forgot-password'}
+                  onClick={() => router.push('/forgot-password')}
                 >
                   Forgot password?
                 </button>
@@ -114,9 +131,17 @@ export default function Login() {
               {/* Button */}
               <button
                 type="submit"
-                className="w-full mt-1 bg-linear-to-r from-[#4b2e2b] via-[#6b3b2e] to-[#c8924b] text-white p-3 rounded-full font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl hover:brightness-105 transition transform hover:-translate-y-[1px]"
+                disabled={loading}
+                className="w-full mt-1 bg-linear-to-r from-[#4b2e2b] via-[#6b3b2e] to-[#c8924b] text-white p-3 rounded-full font-semibold text-sm tracking-wide shadow-lg hover:shadow-xl hover:brightness-105 transition transform hover:-translate-y-px disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
               >
-                Login to 3XCoCo
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Logging in...
+                  </>
+                ) : (
+                  "Login to 3XCoCo"
+                )}
               </button>
 
               {/* Divider */}
@@ -141,9 +166,9 @@ export default function Login() {
             </form>
           </div>
 
-          {/* Little tagline under card */}
+          {/* Tagline */}
           <p className="mt-4 text-center text-[11px] sm:text-xs text-[#f3e0c7]/90">
-            Crafted with love, cocoa, and a pinch of code.
+            One account for all your cocoa cravings.
           </p>
         </div>
       </div>
