@@ -125,7 +125,6 @@ export default function Navbar() {
 
           {/* Mobile Menu Buttons */}
           <div className="md:hidden flex items-center gap-5 shrink-0">
-            {isLoggedIn && <NotificationDropdown />}
 
             <Link href="/cart" className="relative text-[#FFB368] hover:text-[#FFECDC]">
               <ShoppingCart size={22} />
@@ -141,6 +140,8 @@ export default function Navbar() {
             >
               {isOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
+
+            {isLoggedIn && <NotificationDropdown />}
           </div>
         </div>
       </div>
