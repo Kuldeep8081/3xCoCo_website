@@ -5,6 +5,7 @@ import { ShoppingCart, Menu, X, User, LogOut, ShieldCheck } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useRouter } from "next/navigation";
 import Search from "@/components/Search"; // Ensure correct import path
+import NotificationDropdown from "./NotificationDropdown";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +52,7 @@ export default function Navbar() {
     <nav className="sticky top-0 w-full z-50 bg-[#1a0e0f] border-b border-[#3d2326] shadow-xl text-[#FFB368]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 gap-4">
-          
+
           {/* Logo */}
           <Link
             href="/"
@@ -79,7 +80,7 @@ export default function Navbar() {
                 >
                   <User size={18} /> My Orders
                 </Link>
-                
+
                 {/* Admin Link (Desktop) */}
                 {isAdmin && (
                   <Link
@@ -103,6 +104,11 @@ export default function Navbar() {
               </Link>
             )}
 
+            {isLoggedIn && (
+              // Add Notification Bell Here
+              <NotificationDropdown />
+            )}
+
             <Link
               href="/cart"
               className="flex items-center gap-2 hover:text-[#FFECDC] relative"
@@ -119,6 +125,8 @@ export default function Navbar() {
 
           {/* Mobile Menu Buttons */}
           <div className="md:hidden flex items-center gap-5 shrink-0">
+            {isLoggedIn && <NotificationDropdown />}
+
             <Link href="/cart" className="relative text-[#FFB368] hover:text-[#FFECDC]">
               <ShoppingCart size={22} />
               {items.length > 0 && (

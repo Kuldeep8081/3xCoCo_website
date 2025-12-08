@@ -3,6 +3,7 @@ import { Playfair_Display, Lato } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import NotificationButton from "@/components/NotificationButton";
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-serif' })
 const lato = Lato({ weight: ['300', '400'], subsets: ['latin'], variable: '--font-sans' })
 
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body className="font-sans">
         <Navbar />
         {children}
+        <NotificationButton />
         <Footer/>
         </body>
     </html>

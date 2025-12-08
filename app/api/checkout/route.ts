@@ -6,6 +6,7 @@ import connectDB from '@/lib/db';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
 import User from '@/models/User';
+import { notifyAdmins } from '@/lib/notification';
 
 // 1. Define Strict Interfaces
 interface CartItem {
@@ -135,6 +136,11 @@ export async function POST(req: Request) {
       receipt: newOrder._id.toString(),
     });
 
+    notifyAdmins(
+       "New Order Received! 🍫",
+       `Order #${newOrder._id.toString().slice(-4)} worth ₹${finalAmount}`
+      );
+
     return NextResponse.json({
       orderId: newOrder._id,
       razorpayOrderId: razorpayOrder.id,
@@ -146,6 +152,8 @@ export async function POST(req: Request) {
     console.error("Checkout Error:", error);
     
     const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
+
+    
     
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
